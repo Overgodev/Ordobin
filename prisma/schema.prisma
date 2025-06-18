@@ -1,0 +1,115 @@
+// Ordobin Database Schema
+// This is your Prisma schema file for the inventory management system
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  full_name    String?
+  email        String   @unique
+  is_active    Boolean  @default(true)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  
+  activity_logs ActivityLog[]
+  
+  @@map("users")
+}
+
+model Cabinet {
+  id         String @id @default(cuid())
+  label      String
+  location   String?
+  slots_wide Int?
+  slots_tall Int?
+  
+  // Relations
+  drawers Drawer[]
+  
+  @@map("cabinets")
+}
+
+model Drawer {
+  id         String @id @default(cuid())
+  cabinet_id String
+  label      String?
+  item_id    String?
+  quantity   Int?
+  nfc_tag    String?
+  qr_code    String?
+  slot_x     Int?
+  slot_y     Int?
+  
+  // Relations
+  cabinet       Cabinet       @relation(fields: [cabinet_id], references: [id], onDelete: Cascade)
+  item          Item?         @relation(fields: [item_id], references: [id])
+  activity_logs ActivityLog[]
+  alerts        Alert[]
+  weightlogs    WeightLog[]
+  
+  @@map("drawers")
+}
+
+model Item {
+  id          String  @id @default(cuid())
+  name        String
+  type        String?
+  unit_weight Float?
+  description String?
+  
+  // Relations
+  drawers Drawer[]
+  
+  @@map("items")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  user_id   String
+  action    String
+  drawer_id String?
+  details   Json?
+  timestamp DateTime @default(now())
+  
+  // Relations
+  user   User    @relation(fields: [user_id], references: [id])
+  drawer Drawer? @relation(fields: [drawer_id], references: [id])
+  
+  @@map("activity_logs")
+}
+
+model Alert {
+  id         String   @id @default(cuid())
+  drawer_id  String
+  alert_type String
+  severity   String
+  message    String
+  resolved   Boolean  @default(false)
+  created_at DateTime @default(now())
+  
+  // Relations
+  drawer Drawer @relation(fields: [drawer_id], references: [id])
+  
+  @@map("alerts")
+}
+
+model WeightLog {
+  id               String   @id @default(cuid())
+  drawer_id        String
+  timestamp        DateTime @default(now())
+  measured_weight  Float
+  note             String?
+  
+  // Relations
+  drawer Drawer @relation(fields: [drawer_id], references: [id])
+  
+  @@map("weightlogs")
+}
