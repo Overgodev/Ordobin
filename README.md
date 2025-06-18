@@ -31,7 +31,7 @@ Ordobin is a self‑hosted platform that helps you keep track of everything that
 Weight Station ⚖️
 ```
 
-*Everything lives in one repo; no separate “Comb” service (that name is reserved for PrintHive).*
+*All services are managed within a single unified repository—no external service dependency required.*
 
 ---
 
