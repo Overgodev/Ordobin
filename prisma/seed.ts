@@ -1,323 +1,344 @@
-import { PrismaClient } from '@prisma/client'
+// prisma/seed.ts - Prisma Seed Script
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seeding...')
+  console.log('🌱 Starting database seed...');
 
-  // Seed Users
-  const users = await Promise.all([
-    prisma.user.upsert({
-      where: { email: 'admin@inventory.com' },
-      update: {},
-      create: {
-        username: 'admin',
-        full_name: 'System Administrator',
-        email: 'admin@inventory.com',
-        is_active: true,
-      },
-    }),
-    prisma.user.upsert({
-      where: { email: 'manager@inventory.com' },
-      update: {},
-      create: {
-        username: 'manager',
-        full_name: 'Inventory Manager',
-        email: 'manager@inventory.com',
-        is_active: true,
-      },
-    }),
-    prisma.user.upsert({
-      where: { email: 'tech@inventory.com' },
-      update: {},
-      create: {
-        username: 'technician',
-        full_name: 'Lab Technician',
-        email: 'tech@inventory.com',
-        is_active: true,
-      },
-    }),
-  ])
-
-  console.log(`✅ Created ${users.length} users`)
-
-  // Seed Cabinets
-  const cabinets = await Promise.all([
-    prisma.cabinet.upsert({
-      where: { id: 1 },
-      update: {},
-      create: {
-        label: 'CAB-001',
-        location: 'Lab Room A',
-        slots_wide: 10,
-        slots_tall: 8,
-      },
-    }),
-    prisma.cabinet.upsert({
-      where: { id: 2 },
-      update: {},
-      create: {
-        label: 'CAB-002',
-        location: 'Storage Room B',
-        slots_wide: 12,
-        slots_tall: 6,
-      },
-    }),
-    prisma.cabinet.upsert({
-      where: { id: 3 },
-      update: {},
-      create: {
-        label: 'CAB-003',
-        location: 'Main Laboratory',
-        slots_wide: 8,
-        slots_tall: 10,
-      },
-    }),
-  ])
-
-  console.log(`✅ Created ${cabinets.length} cabinets`)
-
-  // Seed Items
-  const items = await Promise.all([
-    prisma.item.upsert({
-      where: { id: 1 },
-      update: {},
-      create: {
-        name: 'Beaker Set',
-        type: 'Glassware',
-        unit_weight: 250.5,
-        description: 'Standard laboratory beakers, various sizes',
-      },
-    }),
-    prisma.item.upsert({
-      where: { id: 2 },
-      update: {},
-      create: {
-        name: 'Digital Scale',
-        type: 'Equipment',
-        unit_weight: 2500.0,
-        description: 'High precision digital scale 0.01g accuracy',
-      },
-    }),
-    prisma.item.upsert({
-      where: { id: 3 },
-      update: {},
-      create: {
-        name: 'Chemical Reagent A',
-        type: 'Chemical',
-        unit_weight: 500.0,
-        description: 'Standard laboratory reagent for testing',
-      },
-    }),
-    prisma.item.upsert({
-      where: { id: 4 },
-      update: {},
-      create: {
-        name: 'Test Tubes',
-        type: 'Glassware',
-        unit_weight: 15.5,
-        description: 'Borosilicate glass test tubes 15ml',
-      },
-    }),
-    prisma.item.upsert({
-      where: { id: 5 },
-      update: {},
-      create: {
-        name: 'Safety Goggles',
-        type: 'Safety Equipment',
-        unit_weight: 85.0,
-        description: 'Anti-fog safety goggles with adjustable strap',
-      },
-    }),
-  ])
-
-  console.log(`✅ Created ${items.length} items`)
-
-  // Seed Drawers with Items
-  const drawers = await Promise.all([
-    prisma.drawer.upsert({
-      where: { id: 1 },
-      update: {},
-      create: {
-        cabinet_id: cabinets[0].id,
-        label: 'A1-Top',
-        item_id: items[0].id, // Beaker Set
-        quantity: 5,
-        nfc_tag: 'NFC001',
-        qr_code: 'QR001',
-        slot_x: 1,
-        slot_y: 1,
-      },
-    }),
-    prisma.drawer.upsert({
-      where: { id: 2 },
-      update: {},
-      create: {
-        cabinet_id: cabinets[0].id,
-        label: 'A2-Middle',
-        item_id: items[3].id, // Test Tubes
-        quantity: 50,
-        nfc_tag: 'NFC002',
-        qr_code: 'QR002',
-        slot_x: 2,
-        slot_y: 1,
-      },
-    }),
-    prisma.drawer.upsert({
-      where: { id: 3 },
-      update: {},
-      create: {
-        cabinet_id: cabinets[1].id,
-        label: 'B1-Equipment',
-        item_id: items[1].id, // Digital Scale
-        quantity: 1,
-        nfc_tag: 'NFC003',
-        qr_code: 'QR003',
-        slot_x: 1,
-        slot_y: 1,
-      },
-    }),
-    prisma.drawer.upsert({
-      where: { id: 4 },
-      update: {},
-      create: {
-        cabinet_id: cabinets[1].id,
-        label: 'B2-Chemicals',
-        item_id: items[2].id, // Chemical Reagent A
-        quantity: 10,
-        nfc_tag: 'NFC004',
-        qr_code: 'QR004',
-        slot_x: 2,
-        slot_y: 1,
-      },
-    }),
-    prisma.drawer.upsert({
-      where: { id: 5 },
-      update: {},
-      create: {
-        cabinet_id: cabinets[2].id,
-        label: 'C1-Safety',
-        item_id: items[4].id, // Safety Goggles
-        quantity: 8,
-        nfc_tag: 'NFC005',
-        qr_code: 'QR005',
-        slot_x: 1,
-        slot_y: 1,
-      },
-    }),
-  ])
-
-  console.log(`✅ Created ${drawers.length} drawers`)
-
-  // Seed Activity Logs
-  const activityLogs = await Promise.all([
-    prisma.activity_log.create({
-      data: {
-        user_id: users[0].id,
-        action: 'ITEM_ADDED',
-        drawer_id: drawers[0].id,
-        details: 'Added 5 beaker sets to drawer A1-Top',
-      },
-    }),
-    prisma.activity_log.create({
-      data: {
-        user_id: users[1].id,
-        action: 'INVENTORY_CHECK',
-        drawer_id: drawers[1].id,
-        details: 'Verified test tube count in drawer A2-Middle',
-      },
-    }),
-    prisma.activity_log.create({
-      data: {
-        user_id: users[2].id,
-        action: 'ITEM_REMOVED',
-        drawer_id: drawers[2].id,
-        details: 'Removed digital scale for calibration',
-      },
-    }),
-  ])
-
-  console.log(`✅ Created ${activityLogs.length} activity logs`)
-
-  // Seed Weight Logs
-  const weightLogs = await Promise.all([
-    prisma.weight_log.create({
-      data: {
-        drawer_id: drawers[0].id,
-        measured_weight: 1252.5,
-        note: 'Initial weight measurement after setup',
-      },
-    }),
-    prisma.weight_log.create({
-      data: {
-        drawer_id: drawers[1].id,
-        measured_weight: 775.0,
-        note: 'Weight check after inventory count',
-      },
-    }),
-    prisma.weight_log.create({
-      data: {
-        drawer_id: drawers[3].id,
-        measured_weight: 5000.0,
-        note: 'Chemical storage weight verification',
-      },
-    }),
-  ])
-
-  console.log(`✅ Created ${weightLogs.length} weight logs`)
-
-  // Seed Alerts
-  const alerts = await Promise.all([
-    prisma.alert.create({
-      data: {
-        drawer_id: drawers[1].id,
-        alert_type: 'LOW_STOCK',
-        severity: 'MEDIUM',
-        message: 'Test tube inventory is running low (5 remaining)',
-        resolved: false,
-      },
-    }),
-    prisma.alert.create({
-      data: {
-        drawer_id: drawers[2].id,
-        alert_type: 'WEIGHT_MISMATCH',
-        severity: 'HIGH',
-        message: 'Measured weight does not match expected weight',
-        resolved: false,
-      },
-    }),
-    prisma.alert.create({
-      data: {
-        drawer_id: drawers[0].id,
-        alert_type: 'MAINTENANCE_DUE',
-        severity: 'LOW',
-        message: 'Drawer cleaning scheduled for next week',
-        resolved: true,
-      },
-    }),
-  ])
-
-  console.log(`✅ Created ${alerts.length} alerts`)
-
-  console.log('🎉 Database seeding completed successfully!')
+  // Create Users
+  const hashedPassword = await bcrypt.hash('password123', 10);
   
-  // Print summary
-  console.log('\n📊 Seeding Summary:')
-  console.log(`   Users: ${users.length}`)
-  console.log(`   Cabinets: ${cabinets.length}`)
-  console.log(`   Items: ${items.length}`)
-  console.log(`   Drawers: ${drawers.length}`)
-  console.log(`   Activity Logs: ${activityLogs.length}`)
-  console.log(`   Weight Logs: ${weightLogs.length}`)
-  console.log(`   Alerts: ${alerts.length}`)
+  const user1 = await prisma.user.create({
+    data: {
+      username: 'admin',
+      full_name: 'System Administrator',
+      email: 'admin@ordobin.com',
+      password: hashedPassword,
+      is_active: true
+    }
+  });
+
+  const user2 = await prisma.user.create({
+    data: {
+      username: 'operator',
+      full_name: 'Warehouse Operator',
+      email: 'operator@ordobin.com',
+      password: hashedPassword,
+      is_active: true
+    }
+  });
+
+  console.log('✅ Users created');
+
+  // Create Items
+  const screwsM6 = await prisma.item.create({
+    data: {
+      name: 'Screws M6x20',
+      type: 'Fastener',
+      unit_weight: 0.5,
+      description: 'Stainless steel hex screws M6x20mm'
+    }
+  });
+
+  const washers6mm = await prisma.item.create({
+    data: {
+      name: 'Washers 6mm',
+      type: 'Fastener',
+      unit_weight: 0.2,
+      description: 'Stainless steel flat washers 6mm'
+    }
+  });
+
+  const boltsM8 = await prisma.item.create({
+    data: {
+      name: 'Bolts M8x30',
+      type: 'Fastener',
+      unit_weight: 1.0,
+      description: 'Stainless steel hex bolts M8x30mm'
+    }
+  });
+
+  const nutsM8 = await prisma.item.create({
+    data: {
+      name: 'Nuts M8',
+      type: 'Fastener',
+      unit_weight: 0.5,
+      description: 'Stainless steel hex nuts M8'
+    }
+  });
+
+  const resistors = await prisma.item.create({
+    data: {
+      name: 'Resistors 1kΩ',
+      type: 'Electronic',
+      unit_weight: 0.1,
+      description: '1/4W Carbon Film Resistors 1kΩ'
+    }
+  });
+
+  const capacitors = await prisma.item.create({
+    data: {
+      name: 'Capacitors 100µF',
+      type: 'Electronic',
+      unit_weight: 0.8,
+      description: 'Electrolytic Capacitors 100µF 25V'
+    }
+  });
+
+  console.log('✅ Items created');
+
+  // Create Cabinets
+  const cabinet1 = await prisma.cabinet.create({
+    data: {
+      label: 'CAB-001',
+      location: 'Workshop A - Wall 1',
+      slots_wide: 4,
+      slots_tall: 3
+    }
+  });
+
+  const cabinet2 = await prisma.cabinet.create({
+    data: {
+      label: 'CAB-002',
+      location: 'Workshop A - Wall 2',
+      slots_wide: 4,
+      slots_tall: 3
+    }
+  });
+
+  const cabinet3 = await prisma.cabinet.create({
+    data: {
+      label: 'CAB-003',
+      location: 'Electronics Lab',
+      slots_wide: 6,
+      slots_tall: 4
+    }
+  });
+
+  console.log('✅ Cabinets created');
+
+  // Create Drawers with realistic data
+  const drawers = [
+    // Cabinet 1 - Fasteners
+    {
+      cabinet_id: cabinet1.id,
+      label: 'Drawer 1-1',
+      item_id: screwsM6.id,
+      quantity: 284,
+      nfc_tag: 'NFC_001_001',
+      qr_code: 'QR_CAB001_01',
+      slot_x: 1,
+      slot_y: 1
+    },
+    {
+      cabinet_id: cabinet1.id,
+      label: 'Drawer 1-2',
+      item_id: washers6mm.id,
+      quantity: 390,
+      nfc_tag: 'NFC_001_002',
+      qr_code: 'QR_CAB001_02',
+      slot_x: 2,
+      slot_y: 1
+    },
+    {
+      cabinet_id: cabinet1.id,
+      label: 'Drawer 1-3',
+      item_id: boltsM8.id,
+      quantity: 45, // Low stock
+      nfc_tag: 'NFC_001_003',
+      qr_code: 'QR_CAB001_03',
+      slot_x: 3,
+      slot_y: 1
+    },
+    {
+      cabinet_id: cabinet1.id,
+      label: 'Drawer 1-4',
+      item_id: nutsM8.id,
+      quantity: 236,
+      nfc_tag: 'NFC_001_004',
+      qr_code: 'QR_CAB001_04',
+      slot_x: 4,
+      slot_y: 1
+    },
+    // Cabinet 2 - More Fasteners
+    {
+      cabinet_id: cabinet2.id,
+      label: 'Drawer 2-1',
+      item_id: screwsM6.id,
+      quantity: 156,
+      nfc_tag: 'NFC_002_001',
+      qr_code: 'QR_CAB002_01',
+      slot_x: 1,
+      slot_y: 1
+    },
+    {
+      cabinet_id: cabinet2.id,
+      label: 'Drawer 2-2',
+      item_id: washers6mm.id,
+      quantity: 8, // Critical stock
+      nfc_tag: 'NFC_002_002',
+      qr_code: 'QR_CAB002_02',
+      slot_x: 2,
+      slot_y: 1
+    },
+    // Cabinet 3 - Electronics
+    {
+      cabinet_id: cabinet3.id,
+      label: 'Drawer 3-1',
+      item_id: resistors.id,
+      quantity: 2450,
+      nfc_tag: 'NFC_003_001',
+      qr_code: 'QR_CAB003_01',
+      slot_x: 1,
+      slot_y: 1
+    },
+    {
+      cabinet_id: cabinet3.id,
+      label: 'Drawer 3-2',
+      item_id: capacitors.id,
+      quantity: 78,
+      nfc_tag: 'NFC_003_002',
+      qr_code: 'QR_CAB003_02',
+      slot_x: 2,
+      slot_y: 1
+    }
+  ];
+
+  const createdDrawers = [];
+  for (const drawerData of drawers) {
+    const drawer = await prisma.drawer.create({
+      data: drawerData
+    });
+    createdDrawers.push(drawer);
+  }
+
+  console.log('✅ Drawers created');
+
+  // Create Weight Logs (historical data)
+  const now = new Date();
+  const weightLogs = [];
+
+  for (const drawer of createdDrawers) {
+    const item = await prisma.item.findUnique({ where: { id: drawer.item_id! } });
+    if (!item) continue;
+
+    const expectedWeight = drawer.quantity! * item.unit_weight!;
+    
+    // Create weight logs for the past 7 days
+    for (let i = 0; i < 7; i++) {
+      const logDate = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
+      const variation = (Math.random() - 0.5) * expectedWeight * 0.1; // ±10% variation
+      const measuredWeight = Math.max(0, expectedWeight + variation);
+
+      weightLogs.push({
+        drawer_id: drawer.id,
+        timestamp: logDate,
+        measured_weight: Math.round(measuredWeight * 100) / 100,
+        note: i === 0 ? 'Latest reading' : `Auto-reading ${i} days ago`
+      });
+    }
+  }
+
+  await prisma.weightLog.createMany({
+    data: weightLogs
+  });
+
+  console.log('✅ Weight logs created');
+
+  // Create Activity Logs
+  const activities = [
+    {
+      user_id: user1.id,
+      action: 'refill',
+      drawer_id: createdDrawers[0].id,
+      details: { previous_quantity: 200, new_quantity: 284, refill_amount: 84 },
+      timestamp: new Date(now.getTime() - 30 * 60 * 1000) // 30 minutes ago
+    },
+    {
+      user_id: user2.id,
+      action: 'weight_check',
+      drawer_id: createdDrawers[1].id,
+      details: { expected_weight: 78, measured_weight: 75.2, discrepancy: 2.8 },
+      timestamp: new Date(now.getTime() - 2 * 60 * 60 * 1000) // 2 hours ago
+    },
+    {
+      user_id: user1.id,
+      action: 'calibration',
+      drawer_id: createdDrawers[2].id,
+      details: { calibration_type: 'sensor_zero', status: 'completed' },
+      timestamp: new Date(now.getTime() - 4 * 60 * 60 * 1000) // 4 hours ago
+    },
+    {
+      user_id: user2.id,
+      action: 'alert_generated',
+      drawer_id: createdDrawers[5].id, // Critical stock drawer
+      details: { alert_type: 'critical_stock', threshold: 10, current_quantity: 8 },
+      timestamp: new Date(now.getTime() - 6 * 60 * 60 * 1000) // 6 hours ago
+    }
+  ];
+
+  await prisma.activityLog.createMany({
+    data: activities
+  });
+
+  console.log('✅ Activity logs created');
+
+  // Create Alerts
+  const alerts = [
+    {
+      drawer_id: createdDrawers[2].id, // Low stock bolt drawer
+      alert_type: 'low_stock',
+      severity: 'warning',
+      message: 'Stock level below 25% threshold',
+      resolved: false
+    },
+    {
+      drawer_id: createdDrawers[5].id, // Critical stock washer drawer
+      alert_type: 'critical_stock',
+      severity: 'error',
+      message: 'Critical stock level - immediate refill required',
+      resolved: false
+    },
+    {
+      drawer_id: createdDrawers[1].id,
+      alert_type: 'weight_discrepancy',
+      severity: 'warning',
+      message: 'Weight measurement differs from expected value',
+      resolved: true
+    }
+  ];
+
+  await prisma.alert.createMany({
+    data: alerts
+  });
+
+  console.log('✅ Alerts created');
+
+  console.log('🎉 Database seeded successfully!');
+  console.log('\n📊 Summary:');
+  console.log(`- Users: ${await prisma.user.count()}`);
+  console.log(`- Items: ${await prisma.item.count()}`);
+  console.log(`- Cabinets: ${await prisma.cabinet.count()}`);
+  console.log(`- Drawers: ${await prisma.drawer.count()}`);
+  console.log(`- Weight Logs: ${await prisma.weightLog.count()}`);
+  console.log(`- Activity Logs: ${await prisma.activityLog.count()}`);
+  console.log(`- Alerts: ${await prisma.alert.count()}`);
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect()
+  .catch((e) => {
+    console.error('❌ Seed failed:', e);
+    process.exit(1);
   })
-  .catch(async (e) => {
-    console.error('❌ Error during seeding:', e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+
+// package.json script to add:
+// "scripts": {
+//   "db:seed": "tsx prisma/seed.ts"
+// }
+
+// Run with: npm run db:seed

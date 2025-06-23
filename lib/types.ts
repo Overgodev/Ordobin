@@ -55,3 +55,38 @@ export interface ErrorState {
   alerts: string | null;
   activityLogs: string | null;
 }
+
+export interface CreateUserData {
+  username: string;
+  email: string;
+  full_name?: string;
+  password: string;
+}
+
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+export interface JWTPayload {
+  userId: string;
+  email: string;
+  username: string;
+}
+
+export interface AuthenticatedUser {
+  id: string;
+  username: string;
+  email: string;
+  full_name: string | null;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
